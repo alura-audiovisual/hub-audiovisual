@@ -23,6 +23,37 @@ significa para o time. É a fonte para relatórios de checkpoint e apresentaçõ
 
 ---
 
+2026-09-10 — Infraestrutura base: deploy no Vercel e arquivos lib/
+
+O quê: colocamos o projeto no ar via Vercel (hub-audiovisual.vercel.app) e criamos os três arquivos que formam a fundação técnica do hub: lib/types.ts, lib/boards.config.ts e lib/clickup.ts.
+
+Por quê: sem esses arquivos nenhum componente visual pode ser construído com segurança. Eles definem as "regras da fiação": como os dados se parecem, onde cada board vive, e que toda chamada ao ClickUp passa por um único lugar.
+
+Significa que: o time agora tem uma URL pública para acompanhar o progresso (cada push atualiza automaticamente). E qualquer desenvolvedor que entrar no projeto vai encontrar uma base tipada, sem any, com as regras de negócio das 6 boards já mapeadas em código.
+
+O que foi entregue:
+
+Deploy contínuo no Vercel — cada push na main atualiza o site automaticamente
+Cada Pull Request gera um link de preview próprio
+Repositório público em github.com/alura-audiovisual/hub-audiovisual
+Colaboradores adicionados: Thiago Botelho e Denis Santos
+lib/types.ts — tipagem completa de tarefas, épicos, subtarefas, boards e payloads (zero any)
+lib/boards.config.ts — mapa oficial das 6 boards com list_ids, regras de ocultação e restrições
+lib/clickup.ts — porta única para a API do ClickUp (getTasksByList, getTask, moveTask, createTask, convertToEpic, updateCustomField, deleteTask, getListStatuses)
+
+Pendências registradas no código (⚠️ confirmar com o time):
+
+IDs reais de status de cada board (hoje são placeholders — precisam ser buscados via API)
+Confirmar automações ativas na board Produção
+Confirmar de quais boards vêm as automações que criam cards em Edição e Edição Externa
+Confirmar que o list_id 901314029949 é mesmo o do Creative Ops (tipo: epics)
+
+Quem tocou: [seu nome].
+
+Estado: ✅ concluído.
+
+---
+
 ## 2026-09-03 — Mapeamento completo das 6 boards e definição das regras de negócio
 
 **O quê:** levantamos board por board como elas funcionam de verdade —
