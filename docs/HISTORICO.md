@@ -23,6 +23,34 @@ significa para o time. É a fonte para relatórios de checkpoint e apresentaçõ
 
 ---
 
+
+2026-09-17 — Estrutura de navegação: sidebar, rotas das boards e Design System aplicado
+
+O quê: construímos a primeira tela visível do hub. A sidebar agora lista as 6 boards com ícone e nome, cada uma com sua própria URL (ex: /board/producao). A paleta dark oficial da Alura e as três fontes do Design System (Encode Sans, Roboto Flex, JetBrains Mono) foram aplicadas de verdade pela primeira vez.
+
+Por quê: antes de construir os Kanbans, era preciso ter a casca de navegação funcionando — como as pessoas vão circular entre as boards, e com a identidade visual correta desde o início, para não ter que reestilizar tudo depois.
+
+Significa que: o time já pode abrir a URL pública do hub e navegar entre as 6 boards, mesmo que o conteúdo ainda seja um placeholder mostrando o list_id de cada uma. A fundação visual (cores, fontes, classes hub-*) está pronta para os componentes de card e coluna que vêm a seguir.
+
+O que foi entregue:
+
+IDs reais de status das 6 boards confirmados via API do ClickUp e aplicados em lib/boards.config.ts (substituindo os placeholders)
+app/globals.css — paleta dark oficial da Alura (
+#1b1c1e corpo, 
+#131416 sidebar, 
+#0c0d0e card, 
+#052fd3 primário) e classes semânticas hub-*
+app/layout.tsx — três fontes do DS carregando via next/font/google
+components/Sidebar/Sidebar.tsx — navegação entre as 6 boards com ícone contextual por board
+app/board/[boardId]/page.tsx — rota dinâmica por board (ainda placeholder, Kanban vem a seguir)
+app/page.tsx — redireciona para a board Produção
+
+Quem tocou: Balbi.
+
+Estado: ✅ concluído.
+
+---
+
 2026-09-10 — Infraestrutura base: deploy no Vercel e arquivos lib/
 
 O quê: colocamos o projeto no ar via Vercel (hub-audiovisual.vercel.app) e criamos os três arquivos que formam a fundação técnica do hub: lib/types.ts, lib/boards.config.ts e lib/clickup.ts.
