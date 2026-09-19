@@ -4,63 +4,79 @@
 // ============================================================
 
 // ------------------------------------------------------------
-// Usuário do ClickUp
+// Primitivos do ClickUp
 // ------------------------------------------------------------
 export interface ClickUpUser {
   id: number;
-  username: string;
-  email: string;
-  profilePicture: string | null;
+  /**
+   * Pode vir null: membro convidado que ainda não ativou a conta aparece
+   * sem username, só com e-mail. Use displayName() de lib/ui.ts para exibir.
+   */
+  username: string | null;
+  email?: string;
+  initials?: string;
+  color?: string;
+  profilePicture?: string | null;
 }
 
-// ------------------------------------------------------------
-// Status (identificado por ID — nunca por texto)
-// ------------------------------------------------------------
 export interface ClickUpStatus {
   id: string;
-  status: string; // nome legível, só para display
+  status: string;
   color: string;
   orderindex: number;
   type: string;
 }
 
-// ------------------------------------------------------------
-// Campo personalizado (custom field)
-// ------------------------------------------------------------
-export type CustomFieldValue = string | number | boolean | ClickUpUser | ClickUpUser[] | null;
-
-export interface ClickUpCustomField {
-  id: string;
-  name: string;
-  type: string;
-  value: CustomFieldValue;
-}
-
-// ------------------------------------------------------------
-// Tag
-// ------------------------------------------------------------
 export interface ClickUpTag {
   name: string;
   tag_fg: string;
   tag_bg: string;
 }
 
-// ------------------------------------------------------------
-// Prioridade
-// ------------------------------------------------------------
 export interface ClickUpPriority {
   id: string;
-  priority: "urgent" | "high" | "normal" | "low";
+  priority: string; // "urgent" | "high" | "normal" | "low"
   color: string;
   orderindex: string;
 }
 
 // ------------------------------------------------------------
-// Tarefa base do ClickUp
+// Campos personalizados
+// O `value` varia por tipo de campo — por isso é tratado como
+// `unknown` e normalizado em lib/fields.ts (nunca com `any`).
+// ------------------------------------------------------------
+export interface CustomFieldOption {
+  id: string;
+  name?: string;
+  label?: string;
+  orderindex?: number;
+  color?: string | null;
+}
+
+export interface CustomFieldTypeConfig {
+  options?: CustomFieldOption[];
+  precision?: number;
+  currency_type?: string;
+  default?: number;
+}
+
+export interface ClickUpCustomField {
+  id: string;
+  name: string;
+  type: string;
+  type_config?: CustomFieldTypeConfig;
+  value?: unknown;
+}
+
+// ------------------------------------------------------------
+// Tarefa
 // ------------------------------------------------------------
 export interface ClickUpTask {
   id: string;
+  custom_id?: string | null;
   name: string;
+  description?: string | null;
+  text_content?: string | null;
   status: ClickUpStatus;
   orderindex: string;
   date_created: string;
@@ -71,39 +87,17 @@ export interface ClickUpTask {
   assignees: ClickUpUser[];
   tags: ClickUpTag[];
   priority: ClickUpPriority | null;
-  description: string | null;
   url: string;
-  list: { id: string; name: string };
+  parent: string | null;
+  /** 1 = Marco (Épico) no ClickUp. Ausente/0 = tarefa comum. */
+  custom_item_id?: number | null;
+  list?: { id: string; name?: string };
   custom_fields: ClickUpCustomField[];
-  parent: string | null; // ID da tarefa pai (subtarefas)
-  subtasks?: ClickUpTask[];
 }
 
-// ------------------------------------------------------------
-// Tarefa enriquecida para boards standard
-// ------------------------------------------------------------
-export interface HubTask extends ClickUpTask {
-  boardType: BoardType;
-}
-
-// ------------------------------------------------------------
-// Épico e Subtarefa (Creative Ops)
-// ------------------------------------------------------------
-export interface EpicTask extends HubTask {
-  boardType: "epics";
-  custom_type: "milestone";
-  subtasks: SubTask[];
-  squad: Squad;
-}
-
-export interface SubTask extends HubTask {
-  boardType: "epics";
-  parent: string; // sempre preenchido em subtarefas
-  inheritedFields: {
-    competencia: string;
-    setorDemandante: string;
-    tags: ClickUpTag[];
-  };
+export interface ClickUpTasksResponse {
+  tasks: ClickUpTask[];
+  last_page: boolean;
 }
 
 // ------------------------------------------------------------
@@ -124,57 +118,87 @@ export type Squad = "Formatos" | "Conteúdo" | "START" | "Gestão";
 export interface BoardConfig {
   id: BoardId;
   name: string;
+  /** Frase curta que explica a board para quem chega novo. */
+  description: string;
   listId: string;
   type: BoardType;
-  allowCreate: boolean; // false na Edição Externa
-  hiddenStatusIds: string[]; // colunas a ocultar (ex: Edição START)
+  /** Edição Externa = false. Nenhum botão de criação é renderizado. */
+  allowCreate: boolean;
+  /** Motivo exibido quando a criação está bloqueada. */
+  createBlockedReason?: string;
+  /** Status que nunca são renderizados (colunas obsoletas). */
+  hiddenStatusIds: string[];
+  /** Creative Ops: filtro por squad/competência é obrigatório. */
+  hasSquadFilter: boolean;
 }
 
 // ------------------------------------------------------------
-// Coluna do Kanban (agrupamento de tarefas por status)
-// ------------------------------------------------------------
-export interface KanbanColumn {
-  statusId: string;
-  statusName: string;
-  color: string;
-  tasks: HubTask[];
-}
-
-// ------------------------------------------------------------
-// Resposta paginada da API do ClickUp
-// ------------------------------------------------------------
-export interface ClickUpTasksResponse {
-  tasks: ClickUpTask[];
-  last_page: boolean;
-}
-
-// ------------------------------------------------------------
-// Payload para mover uma tarefa de coluna
+// Contratos das rotas de API do hub
 // ------------------------------------------------------------
 export interface MoveTaskPayload {
   taskId: string;
-  newStatusId: string;
+  boardId: BoardId;
+  statusId: string;
 }
 
-// ------------------------------------------------------------
-// Payload para criar uma tarefa
-// ------------------------------------------------------------
 export interface CreateTaskPayload {
-  listId: string;
+  boardId: BoardId;
   name: string;
-  statusId?: string;
-  assignees?: number[];
-  priority?: number;
-  customFields?: Array<{ id: string; value: CustomFieldValue }>;
-  parentId?: string; // só para subtarefas do Creative Ops
+  statusId: string;
+  /** Preenchido só quando é subtarefa de um Épico (Creative Ops). */
+  parentId?: string;
+}
+
+export interface DeleteTaskPayload {
+  taskId: string;
+}
+
+export interface ApiError {
+  error: string;
 }
 
 // ------------------------------------------------------------
-// Payload para criar um Épico (Creative Ops)
+// Comentários (a "Atividade" do card)
 // ------------------------------------------------------------
-export interface CreateEpicPayload extends CreateTaskPayload {
-  squad: Squad;
-  tipoDemanda?: string;
-  setorDemandante?: string;
+export interface ClickUpComment {
+  id: string;
+  comment_text: string;
+  user: ClickUpUser;
+  date: string;
+  reply_count?: number;
+  resolved?: boolean;
+}
+
+export interface ClickUpSpaceTag {
+  name: string;
+  tag_fg: string;
+  tag_bg: string;
+}
+
+/** Definição de um campo personalizado da lista (sem valor). */
+export type ClickUpFieldDefinition = Omit<ClickUpCustomField, "value">;
+
+/** Campo oferecido no formulário de criação de card. */
+export interface CreationField {
+  key: string;
+  label: string;
+  fieldId: string;
+  type: string;
+  options: Array<{ id: string; label: string }>;
+}
+
+/** Tudo que o front precisa para editar e criar cards numa board. */
+export interface BoardMeta {
+  members: ClickUpUser[];
+  tags: ClickUpSpaceTag[];
+  /** Campos oferecidos no formulário de criação (os que o card exibe). */
+  creationFields: CreationField[];
+  /** Todos os campos editáveis no modal — inclui os do card. */
+  editableFields: CreationField[];
+}
+
+export interface CreateTaskProperties {
+  assignees?: number[];
+  customFields?: Array<{ id: string; value: unknown }>;
   tags?: string[];
 }

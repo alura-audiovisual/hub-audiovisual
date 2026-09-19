@@ -44,6 +44,9 @@
   --color-error: var(--error);
   --color-attention: var(--attention);
   --color-info: var(--info);
+  --color-epic: var(--epic);
+  --color-subtask: var(--subtask);
+  --color-lane: var(--lane);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -54,64 +57,72 @@
 }
 
 /* ============================================================
-   Design System Alura — paleta dark oficial (CLAUDE.md)
+   Design System Alura — paleta dark oficial.
    O hub é dark-only: não existe modo claro no MVP.
    ============================================================ */
 :root {
-  --background: #1b1c1e; /* corpo */
-  --foreground: oklch(0.985 0 0);
-  --card: #0c0d0e;
-  --card-foreground: oklch(0.985 0 0);
-  --popover: #0c0d0e;
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: #052fd3; /* só botões de criação e badges de status */
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: #26282b;
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: #26282b;
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: #26282b;
-  --accent-foreground: oklch(0.985 0 0);
+  --background: #1b1c1e;      /* corpo */
+  --foreground: #f2f3f5;
+  --card: #0c0d0e;            /* fundo de card */
+  --card-foreground: #f2f3f5;
+  --popover: #131416;
+  --popover-foreground: #f2f3f5;
+  --primary: #052fd3;         /* só criação e badges de status */
+  --primary-foreground: #ffffff;
+  --secondary: #23252a;
+  --secondary-foreground: #e6e8ec;
+  --muted: #23252a;
+  --muted-foreground: #9aa0aa;
+  --accent: #23252a;
+  --accent-foreground: #f2f3f5;
   --destructive: #d33d44;
-  --border: oklch(1 0 0 / 8%);
-  --input: oklch(1 0 0 / 12%);
-  --ring: #4878ea; /* hover azul */
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
+  --border: rgba(255, 255, 255, 0.08);
+  --input: rgba(255, 255, 255, 0.12);
+  --ring: #4878ea;            /* hover azul / foco */
+  --chart-1: #052fd3;
+  --chart-2: #4878ea;
+  --chart-3: #5f8bec;
+  --chart-4: #9aa0aa;
+  --chart-5: #23252a;
   --radius: 0.625rem;
 
-  /* Sidebar */
-  --sidebar: #131416; /* sem borda */
-  --sidebar-foreground: oklch(0.985 0 0);
+  /* Sidebar — sem borda, conforme DS */
+  --sidebar: #131416;
+  --sidebar-foreground: #f2f3f5;
   --sidebar-primary: #052fd3;
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: #1b1c1e;
-  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #1f2125;
+  --sidebar-accent-foreground: #ffffff;
   --sidebar-border: transparent;
   --sidebar-ring: #4878ea;
 
-  /* Interativo e feedback do DS — nunca usar cores genéricas do Tailwind */
-  --interactive: #5f8bec; /* text-interactive, nunca text-primary */
+  /* Interativo e feedback — nunca usar emerald/rose/amber genéricos */
+  --interactive: #5f8bec;
   --success: #3db88b;
   --error: #d33d44;
   --attention: #f3af10;
   --info: #1090e0;
+
+  /* Hierarquia Creative Ops */
+  --epic: #a06ef5;            /* badge roxo — Épico */
+  --subtask: #e0812f;         /* badge laranja — Subtarefa */
+
+  /* Fundo das raias do Kanban */
+  --lane: rgba(255, 255, 255, 0.025);
 }
 
 .dark {
-  /* O hub não tem modo claro — .dark replica :root para evitar FOUC */
   --background: #1b1c1e;
-  --foreground: oklch(0.985 0 0);
+  --foreground: #f2f3f5;
   --card: #0c0d0e;
-  --card-foreground: oklch(0.985 0 0);
+  --card-foreground: #f2f3f5;
 }
 
 @layer base {
+  /* Todo filho de grid pode quebrar em vez de empurrar o contêiner. */
+  [class*='grid'] > * { min-width: 0; overflow-wrap: anywhere; }
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border;
   }
   body {
     @apply bg-background text-foreground;
@@ -119,36 +130,52 @@
   html {
     @apply font-sans;
   }
+  /* Acessibilidade: foco sempre visível, nunca removido. */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+  /* Respeita quem pediu menos movimento no sistema. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
 }
 
 /* ============================================================
-   Classes semânticas do hub — sempre usar estas, nunca estilizar
-   título/tag/número direto com classes soltas do Tailwind.
+   Classes semânticas do hub.
+   Sempre usar estas — nunca estilizar título/tag/número solto.
    ============================================================ */
 @layer components {
   .hub-page-title {
     font-family: var(--font-encode-sans);
-    @apply text-2xl font-semibold tracking-tight text-foreground;
+    @apply text-xl font-semibold tracking-tight text-foreground;
   }
 
   .hub-card-title {
     font-family: var(--font-encode-sans);
-    @apply text-sm font-medium leading-snug text-foreground;
+    @apply text-[13px] font-medium leading-snug text-foreground;
+    overflow-wrap: anywhere;
   }
 
   .hub-table-header {
     font-family: var(--font-encode-sans);
-    @apply text-xs font-semibold uppercase tracking-wide text-muted-foreground;
+    @apply text-[13px] font-semibold text-foreground;
   }
 
   .hub-tab-label {
     font-family: var(--font-roboto-flex);
-    @apply text-sm font-medium text-foreground;
+    @apply text-sm font-medium;
   }
 
   .hub-tag {
     font-family: var(--font-jetbrains-mono);
-    @apply text-[11px] px-2 py-0.5 rounded-md;
+    @apply text-[10px] leading-none px-1.5 py-1 rounded-md;
   }
 
   .hub-number {
@@ -156,17 +183,95 @@
     @apply tabular-nums;
   }
 
-  .text-interactive {
-    color: var(--interactive);
-  }
-  .text-interactive:hover {
-    color: #4878ea;
+  .hub-meta {
+    font-family: var(--font-jetbrains-mono);
+    @apply text-[11px] text-muted-foreground;
+    overflow-wrap: anywhere;
   }
 
+  /* Card cujo corpo inteiro abre algo — sem botão redundante. */
   .hub-card-clicavel {
-    @apply cursor-pointer transition-colors;
+    @apply cursor-pointer transition-colors duration-150;
   }
   .hub-card-clicavel:hover {
-    background-color: color-mix(in oklab, var(--card) 85%, white 15%);
+    border-color: rgba(255, 255, 255, 0.16);
+    background-color: #131416;
   }
+
+  .hub-botao-primario {
+    background-color: var(--primary);
+    @apply text-primary-foreground text-sm font-medium rounded-lg px-3.5 py-2 transition-colors;
+  }
+  .hub-botao-primario:hover {
+    background-color: #4878ea;
+  }
+
+  .hub-botao-sutil {
+    @apply text-sm font-medium rounded-lg px-3 py-2 text-muted-foreground transition-colors;
+  }
+  .hub-botao-sutil:hover {
+    @apply bg-secondary text-foreground;
+  }
+
+  .hub-input {
+    @apply w-full rounded-lg bg-secondary px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground;
+    border: 1px solid var(--border);
+  }
+  .hub-input:focus {
+    outline: none;
+    border-color: var(--ring);
+  }
+
+  /* Raia (coluna) do Kanban */
+  .hub-lane {
+    background-color: var(--lane);
+    @apply rounded-2xl;
+  }
+  .hub-lane-ativa {
+    background-color: rgba(88, 135, 236, 0.08);
+    box-shadow: inset 0 0 0 1.5px var(--ring);
+  }
+
+  /* Campo de data: o ícone nativo é claro e destoa do tema escuro. */
+  .hub-date::-webkit-calendar-picker-indicator {
+    filter: invert(0.75);
+    cursor: pointer;
+  }
+  .hub-date::-webkit-datetime-edit {
+    color: var(--foreground);
+  }
+}
+
+/* ============================================================
+   Barra de rolagem — parte da identidade, não sobra do sistema.
+   Vale para a janela inteira e para qualquer área rolável do hub.
+   ============================================================ */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.14) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.22);
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
 }
