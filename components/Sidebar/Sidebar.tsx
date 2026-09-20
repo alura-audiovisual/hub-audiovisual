@@ -23,6 +23,7 @@ import {
 import { NAVIGATION, type NavItem, type NavSection } from "@/lib/navigation";
 import { BOARDS } from "@/lib/boards.config";
 import { cx } from "@/lib/ui";
+import { CartaoPessoa } from "./CartaoPessoa";
 
 const ICONS: Record<string, LucideIcon> = {
   video: Video,
@@ -244,8 +245,8 @@ export function Sidebar() {
         })}
       </nav>
 
-      <div className="px-5 py-3.5 shrink-0 border-t border-border/40">
-        <p className="hub-meta">Dados do ClickUp</p>
+      <div className="shrink-0">
+        <CartaoPessoa />
       </div>
     </aside>
   );

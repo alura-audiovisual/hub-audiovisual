@@ -1,8 +1,12 @@
 import { NextResponse } from "next/server";
+import { autorizarEscrita } from "@/lib/auth/guarda";
 import { addTaskTag, getTask, removeTaskTag } from "@/lib/clickup";
 import { invalidateList } from "@/lib/cache";
 
 export async function POST(request: Request) {
+  const permitido = await autorizarEscrita();
+  if (!permitido.ok) return permitido.resposta;
+
   const body = (await request.json()) as Partial<{
     taskId: string;
     add: string;

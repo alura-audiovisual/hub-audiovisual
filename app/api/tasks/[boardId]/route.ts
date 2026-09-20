@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { autorizarLeitura } from "@/lib/auth/guarda";
 import { getTasksByList } from "@/lib/clickup";
 import { readCache, writeCache } from "@/lib/cache";
 import { BOARDS, isValidBoardId } from "@/lib/boards.config";
@@ -7,6 +8,9 @@ export async function GET(
   request: Request,
   { params }: { params: Promise<{ boardId: string }> }
 ) {
+  const permitido = await autorizarLeitura();
+  if (!permitido.ok) return permitido.resposta;
+
   const { boardId } = await params;
 
   if (!isValidBoardId(boardId)) {

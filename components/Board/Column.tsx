@@ -6,6 +6,7 @@ import type { BoardId, BoardMeta, ClickUpTask, CreateTaskProperties } from "@/li
 import { getColumnColor } from "@/lib/boards.config";
 import type { ColumnDef } from "@/lib/boards.config";
 import { cx } from "@/lib/ui";
+import { usePodeEscrever } from "@/components/Sessao/SessaoProvider";
 import { TaskCard } from "@/components/Card/TaskCard";
 import { CreateTaskForm } from "./CreateTaskForm";
 
@@ -53,6 +54,7 @@ export function Column({
   meta,
   loadingMeta,
 }: ColumnProps) {
+  const podeEscrever = usePodeEscrever();
   const color = getColumnColor(boardId, column.statusId);
   const [collapsed, setCollapsed] = useState(Boolean(column.collapsedByDefault));
   const [visible, setVisible] = useState(PAGE_SIZE);
@@ -124,7 +126,7 @@ export function Column({
           {loading ? "—" : tasks.length}
         </span>
 
-        {allowCreate && (
+        {allowCreate && podeEscrever && (
           <button
             type="button"
             onClick={() => setCreating(true)}

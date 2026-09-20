@@ -1,8 +1,12 @@
 import { NextResponse } from "next/server";
+import { autorizarEscrita } from "@/lib/auth/guarda";
 import { TriageError, moveTaskOnBoard } from "@/lib/board-actions";
 import { isValidBoardId } from "@/lib/boards.config";
 
 export async function POST(request: Request) {
+  const permitido = await autorizarEscrita();
+  if (!permitido.ok) return permitido.resposta;
+
   const body = (await request.json()) as Partial<{
     taskId: string;
     boardId: string;

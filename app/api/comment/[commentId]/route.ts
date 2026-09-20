@@ -1,10 +1,14 @@
 import { NextResponse } from "next/server";
+import { autorizarEscrita, autorizarLeitura } from "@/lib/auth/guarda";
 import { createCommentReply, deleteComment, getCommentReplies } from "@/lib/clickup";
 
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ commentId: string }> }
 ) {
+  const permitido = await autorizarLeitura();
+  if (!permitido.ok) return permitido.resposta;
+
   const { commentId } = await params;
   try {
     const replies = await getCommentReplies(commentId);
@@ -19,6 +23,9 @@ export async function POST(
   request: Request,
   { params }: { params: Promise<{ commentId: string }> }
 ) {
+  const permitido = await autorizarEscrita();
+  if (!permitido.ok) return permitido.resposta;
+
   const { commentId } = await params;
   const body = (await request.json()) as Partial<{ text: string }>;
 
@@ -40,6 +47,9 @@ export async function DELETE(
   _request: Request,
   { params }: { params: Promise<{ commentId: string }> }
 ) {
+  const permitido = await autorizarEscrita();
+  if (!permitido.ok) return permitido.resposta;
+
   const { commentId } = await params;
   try {
     await deleteComment(commentId);

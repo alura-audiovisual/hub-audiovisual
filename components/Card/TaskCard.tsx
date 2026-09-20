@@ -7,6 +7,7 @@ import { BOARD_CARDS, showsTags } from "@/lib/boards.config";
 import { fieldText } from "@/lib/fields";
 import { cx, formatDate, isOverdue } from "@/lib/ui";
 import { isEpic, isSubtask } from "@/lib/board-actions";
+import { usePodeEscrever } from "@/components/Sessao/SessaoProvider";
 import { Avatars } from "./Avatars";
 import { EpicBadge, SubtaskBadge } from "./Badges";
 
@@ -43,6 +44,7 @@ export function TaskCard({
   isDragging,
   epicProgressLabel,
 }: TaskCardProps) {
+  const podeEscrever = usePodeEscrever();
   const fields = BOARD_CARDS[boardId].collapsed
     .map((field) => ({ label: field.label, value: fieldText(task, field.key) }))
     .filter((field): field is { label: string; value: string } => Boolean(field.value));
@@ -67,7 +69,7 @@ export function TaskCard({
     <div
       role="button"
       tabIndex={0}
-      draggable
+      draggable={podeEscrever}
       aria-label={`Abrir tarefa ${task.name}`}
       onClick={() => onOpen(task)}
       onKeyDown={(event) => {

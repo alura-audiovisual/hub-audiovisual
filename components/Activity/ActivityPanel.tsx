@@ -5,6 +5,7 @@ import { CornerDownRight, Loader2, Send, Trash2 } from "lucide-react";
 import type { ClickUpComment, ClickUpTask, ClickUpUser } from "@/lib/types";
 import { avatarTone, cx, displayName, formatDateTime, initials, timeAgo } from "@/lib/ui";
 import { linkify } from "@/lib/linkify";
+import { usePodeEscrever } from "@/components/Sessao/SessaoProvider";
 
 /**
  * A API v2 do ClickUp expõe os COMENTÁRIOS, mas não o log de atividades
@@ -22,6 +23,7 @@ export function ActivityPanel({ task }: { task: ClickUpTask }) {
   const [replyDraft, setReplyDraft] = useState("");
   const [replies, setReplies] = useState<Record<string, ClickUpComment[]>>({});
   const [me, setMe] = useState<ClickUpUser | null>(null);
+  const podeEscrever = usePodeEscrever();
 
   // P13: o botão de excluir só aparece no comentário de quem está usando.
   // Antes aparecia em todos e só falhava depois do clique.
@@ -279,6 +281,7 @@ export function ActivityPanel({ task }: { task: ClickUpTask }) {
         })}
       </div>
 
+      {podeEscrever ? (
       <div className="rounded-xl border border-border bg-card p-2.5 space-y-2">
         <textarea
           rows={2}
@@ -311,6 +314,11 @@ export function ActivityPanel({ task }: { task: ClickUpTask }) {
           </button>
         </div>
       </div>
+      ) : (
+        <p className="hub-meta leading-relaxed">
+          Seu papel no hub permite ler os comentários, mas não escrever.
+        </p>
+      )}
     </div>
   );
 }

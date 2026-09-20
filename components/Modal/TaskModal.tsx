@@ -15,6 +15,7 @@ import { BOARD_CARDS, getVisibleColumns, showsTags } from "@/lib/boards.config";
 import { fieldText } from "@/lib/fields";
 import { cx } from "@/lib/ui";
 import { isEpic, isSubtask } from "@/lib/board-actions";
+import { usePodeEscrever } from "@/components/Sessao/SessaoProvider";
 import { EpicBadge, SubtaskBadge } from "@/components/Card/Badges";
 import { AssigneeEditor } from "@/components/Editors/AssigneeEditor";
 import { TagEditor } from "@/components/Editors/TagEditor";
@@ -72,6 +73,7 @@ export function TaskModal({
   const [subtaskDraft, setSubtaskDraft] = useState("");
   const [creatingSubtask, setCreatingSubtask] = useState(false);
 
+  const podeEscrever = usePodeEscrever();
   const epic = isEpic(task);
   const columns = getVisibleColumns(boardId);
   const currentColumn = columns.find((column) => column.statusId === task.status.id);
@@ -196,7 +198,8 @@ export function TaskModal({
                 onClick={() => setMoveOpen((current) => !current)}
                 aria-haspopup="listbox"
                 aria-expanded={moveOpen}
-                disabled={movingTo !== null}
+                disabled={movingTo !== null || !podeEscrever}
+                title={podeEscrever ? undefined : "Seu papel permite ver, mas não mover cards."}
                 className="flex items-center gap-2 rounded-lg border border-border bg-secondary px-3 py-2 text-[13px] min-w-[200px] disabled:opacity-60"
               >
                 {movingTo ? (
@@ -350,6 +353,7 @@ export function TaskModal({
                   ))}
                 </ul>
 
+                {podeEscrever && (
                 <div className="flex items-center gap-2">
                   <input
                     value={subtaskDraft}
@@ -378,10 +382,12 @@ export function TaskModal({
                     Criar
                   </button>
                 </div>
+                )}
               </section>
             )}
 
             {/* Exclusão — fricção positiva, zona sempre presente */}
+            {podeEscrever && (
             <section className="pt-2 border-t border-border">
               <h3 className="hub-table-header mb-2.5">Excluir</h3>
 
@@ -467,6 +473,7 @@ export function TaskModal({
                 </p>
               )}
             </section>
+            )}
           </div>
 
           <div className="min-w-0">

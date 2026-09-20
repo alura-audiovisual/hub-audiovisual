@@ -1,10 +1,14 @@
 import { NextResponse } from "next/server";
+import { autorizarEscrita, autorizarLeitura } from "@/lib/auth/guarda";
 import { createComment, getComments } from "@/lib/clickup";
 
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ taskId: string }> }
 ) {
+  const permitido = await autorizarLeitura();
+  if (!permitido.ok) return permitido.resposta;
+
   const { taskId } = await params;
   try {
     const comments = await getComments(taskId);
@@ -19,6 +23,9 @@ export async function POST(
   request: Request,
   { params }: { params: Promise<{ taskId: string }> }
 ) {
+  const permitido = await autorizarEscrita();
+  if (!permitido.ok) return permitido.resposta;
+
   const { taskId } = await params;
   const body = (await request.json()) as Partial<{ text: string }>;
 
